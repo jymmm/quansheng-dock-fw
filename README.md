@@ -2,6 +2,8 @@
 This firmware is required to use my Quansheng Dock project found here : https://github.com/nicsure/QuanshengDock
 The rest of this markup is left as per the original.
 
+Download the pre-compiled and packed firmware image here. Use any firmware update tool to burn it to the radio.
+https://github.com/nicsure/quansheng-dock-fw/releases/download/v0.21q/firmware.packed.bin
 
 # Open re-implementation of the Quansheng UV-K5/K6/5R v2.1.27 firmware
 
