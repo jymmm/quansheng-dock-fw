@@ -227,7 +227,7 @@ void DisplayRSSIBar(const bool now)
 	UI_PrintStringSmallNormal(str, 2, 0, line);
 	DrawLevelBar(bar_x, line, s_level + overS9Bars);
 	#ifdef ENABLE_DOCK
-		if(now)
+		if (now)
 			UART_SendUiElement(8, s_level, overS9Bars, 0, 0, NULL);
 	#endif
 	if (now)
