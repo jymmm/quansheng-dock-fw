@@ -1,3 +1,8 @@
+# Modified firmware forked from https://github.com/egzumer/uv-k5-firmware-custom
+This firmware is required to use my Quansheng Dock project found here : https://github.com/nicsure/QuanshengDock
+The rest of this markup is left as per the original.
+
+
 # Open re-implementation of the Quansheng UV-K5/K6/5R v2.1.27 firmware
 
 This repository is a merge of [OneOfEleven custom firmware](https://github.com/OneOfEleven/uv-k5-firmware-custom) with [fagci spectrum analizer](https://github.com/fagci/uv-k5-firmware-fagci-mod/tree/refactor) plus my few changes.<br>
@@ -117,6 +122,7 @@ You'll find the options at the top of "Makefile" ('0' = disable, '1' = enable) .
 | ENABLE_BYP_RAW_DEMODULATORS | additional BYP (bypass?) and RAW demodulation options, proved not to be very useful, but it is there if you want to experiment |
 | ENABLE_BLMIN_TMP_OFF | additional function for configurable buttons that toggles `BLMin` on and off wihout saving it to the EEPROM |
 | ENABLE_SCAN_RANGES | scan range mode for frequency scanning, see wiki for instructions (radio operation -> frequency scanning) |
+| ENABLE_DOCK | Enables the features required for remote operation with Quansheng Dock |
 |🧰 **DEBUGGING** ||
 | ENABLE_AM_FIX_SHOW_DATA| displays settings used by  AM-fix when AM transmission is received |
 | ENABLE_AGC_SHOW_DATA | displays AGC settings |
