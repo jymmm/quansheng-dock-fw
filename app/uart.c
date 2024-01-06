@@ -604,7 +604,7 @@ static void CMD_052F(const uint8_t *pBuffer)
 					if(icnt>=100 || tot>=steps-1) // check if we need to send a reply yet
 					{
 						// set reply params
-						Reply->Header.ID = 0x708;
+						Reply->Header.ID = 0x808;
 						Reply->Header.Size = sizeof(Reply->Data);	
 						Reply->Data.Sync = sync;
 						Reply->Data.Length = icnt;
