@@ -35,7 +35,9 @@
 #include "inputbox.h"
 #include "menu.h"
 #include "ui.h"
-
+#ifdef ENABLE_DOCK
+	#include "app/uart.h"
+#endif
 
 const t_menu_item MenuList[] =
 {
@@ -403,6 +405,9 @@ void UI_DisplayMenu(void)
 #endif
 
 	UI_DisplayClear();
+	#ifdef ENABLE_DOCK
+		UART_SendUiElement(5, 1, 7, 0, 0, &gFrameBuffer);
+	#endif	
 
 #ifndef ENABLE_CUSTOM_MENU_LAYOUT
 		// original menu layout

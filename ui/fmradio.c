@@ -27,12 +27,18 @@
 #include "ui/helper.h"
 #include "ui/inputbox.h"
 #include "ui/ui.h"
+#ifdef ENABLE_DOCK
+	#include "app/uart.h"
+#endif
 
 void UI_DisplayFM(void)
 {
 	char String[16] = {0};
 	char *pPrintStr = String;
 	UI_DisplayClear();
+	#ifdef ENABLE_DOCK
+		UART_SendUiElement(5, 1, 7, 0, 0, &gFrameBuffer);
+	#endif
 
 	UI_PrintString("FM", 0, 127, 0, 12);
 

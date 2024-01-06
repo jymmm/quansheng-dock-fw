@@ -26,6 +26,9 @@
 #include "ui/aircopy.h"
 #include "ui/helper.h"
 #include "ui/inputbox.h"
+#ifdef ENABLE_DOCK
+	#include "app/uart.h"
+#endif
 
 void UI_DisplayAircopy(void)
 {
@@ -33,6 +36,10 @@ void UI_DisplayAircopy(void)
 	char *pPrintStr = { 0 };
 
 	UI_DisplayClear();
+
+	#ifdef ENABLE_DOCK
+		UART_SendUiElement(5, 1, 7, 0, 0, NULL);
+	#endif
 
 	if (gAircopyState == AIRCOPY_READY) {
 		pPrintStr = "AIR COPY(RDY)";
