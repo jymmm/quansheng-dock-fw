@@ -36,7 +36,7 @@ void UI_DisplayReleaseKeys(void)
 	UI_DisplayClear();
 	
 	#ifdef ENABLE_DOCK
-		UART_SendUiElement(5, 0, 7, 0, 0, NULL);
+		UART_SendUiElement(5, 0, 0, 0, 0, NULL);
 	#endif
 
 	UI_PrintString("RELEASE", 0, 127, 1, 10);
@@ -55,7 +55,7 @@ void UI_DisplayWelcome(void)
 	UI_DisplayClear();
 
 	#ifdef ENABLE_DOCK
-		UART_SendUiElement(5, 0, 7, 0, 0, NULL);
+		UART_SendUiElement(5, 0, 0, 0, 0, NULL);
 	#endif
 
 	if (gEeprom.POWER_ON_DISPLAY_MODE == POWER_ON_DISPLAY_MODE_NONE || gEeprom.POWER_ON_DISPLAY_MODE == POWER_ON_DISPLAY_MODE_FULL_SCREEN) {

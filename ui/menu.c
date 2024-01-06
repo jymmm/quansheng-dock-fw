@@ -405,9 +405,6 @@ void UI_DisplayMenu(void)
 #endif
 
 	UI_DisplayClear();
-	#ifdef ENABLE_DOCK
-		UART_SendUiElement(5, 1, 7, 0, 0, &gFrameBuffer);
-	#endif	
 
 #ifndef ENABLE_CUSTOM_MENU_LAYOUT
 		// original menu layout

@@ -37,10 +37,6 @@ void UI_DisplayAircopy(void)
 
 	UI_DisplayClear();
 
-	#ifdef ENABLE_DOCK
-		UART_SendUiElement(5, 1, 7, 0, 0, NULL);
-	#endif
-
 	if (gAircopyState == AIRCOPY_READY) {
 		pPrintStr = "AIR COPY(RDY)";
 	} else if (gAircopyState == AIRCOPY_TRANSFER) {

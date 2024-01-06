@@ -35,9 +35,7 @@ void UI_DisplayScanner(void)
 	uint8_t Start;
 
 	UI_DisplayClear();
-	#ifdef ENABLE_DOCK
-		UART_SendUiElement(5, 1, 7, 0, 0, NULL);
-	#endif
+
 	if (gScanSingleFrequency || (gScanCssState != SCAN_CSS_STATE_OFF && gScanCssState != SCAN_CSS_STATE_FAILED)) {
 		sprintf(String, "FREQ:%u.%05u", gScanFrequency / 100000, gScanFrequency % 100000);
 		pPrintStr = String;

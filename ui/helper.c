@@ -246,9 +246,7 @@ void UI_DrawRectangleBuffer(uint8_t (*buffer)[128], int16_t x1, int16_t y1, int1
 void UI_DisplayPopup(const char *string)
 {
 	UI_DisplayClear();
-	#ifdef ENABLE_DOCK
-		UART_SendUiElement(5, 1, 7, 0, 0, &string);
-	#endif	
+	
 	// for(uint8_t i = 1; i < 5; i++) {
 	// 	memset(gFrameBuffer[i]+8, 0x00, 111);
 	// }
@@ -269,5 +267,8 @@ void UI_DisplayPopup(const char *string)
 
 void UI_DisplayClear()
 {
+	#ifdef ENABLE_DOCK
+		UART_SendUiElement(5, 1, 7, 0, 0, &gFrameBuffer);
+	#endif
 	memset(gFrameBuffer, 0, sizeof(gFrameBuffer));
 }

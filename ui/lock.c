@@ -38,7 +38,7 @@ static void Render(void)
 	UI_DisplayClear();
 
 	#ifdef ENABLE_DOCK 
-		UART_SendUiElement(5, 0, 7, 0, 0, NULL);
+		UART_SendUiElement(5, 0, 0, 0, 0, NULL);
 	#endif	
 
 	UI_PrintString("LOCK", 0, 127, 1, 10);

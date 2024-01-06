@@ -321,9 +321,6 @@ void UI_DisplayMain(void)
 
 	// clear the screen
 	UI_DisplayClear();
-	#ifdef ENABLE_DOCK
-		UART_SendUiElement(5, 1, 7, 0, 0, &gFrameBuffer);
-	#endif
 
 	if(gLowBattery && !gLowBatteryConfirmed) {
 		UI_DisplayPopup("LOW BATTERY");
