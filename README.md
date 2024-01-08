@@ -1,9 +1,17 @@
 # Modified firmware forked from https://github.com/egzumer/uv-k5-firmware-custom
 This firmware is required to use my Quansheng Dock project found here : https://github.com/nicsure/QuanshengDock
-The rest of this markup is left as per the original.
 
 Download the pre-compiled and packed firmware image here. Use any firmware update tool to burn it to the radio.
 https://github.com/nicsure/quansheng-dock-fw/releases/download/v0.21q/firmware.packed.bin
+
+Alternativly use your browser to flash the radio.
+https://egzumer.github.io/uvtools/?firmwareURL=https://github.com/nicsure/quansheng-dock-fw/releases/download/v0.21q/firmware.packed.bin
+Thanks go to egzumer for providing this tool.
+
+
+
+
+The rest of this readme is the original from the parent egzumer firmware project.
 
 # Open re-implementation of the Quansheng UV-K5/K6/5R v2.1.27 firmware
 
