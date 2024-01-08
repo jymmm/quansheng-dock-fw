@@ -619,14 +619,17 @@ static void CMD_052F(const uint8_t *pBuffer)
 
 	void UART_SendUiElement(uint8_t type, uint32_t value1, uint32_t value2, uint32_t value3, uint32_t Length, const void* data)
 	{
-		const uint8_t id = 0xB5;
-		UART_Send(&id, 1);
-		UART_Send(&type, 1);
-		UART_Send(&value1, 1);
-		UART_Send(&value2, 1);
-		UART_Send(&value3, 1);
-		UART_Send(&Length, 1);
-		UART_Send(data, Length);
+		if(gSetting_Remote_UI)
+		{
+			const uint8_t id = 0xB5;
+			UART_Send(&id, 1);
+			UART_Send(&type, 1);
+			UART_Send(&value1, 1);
+			UART_Send(&value2, 1);
+			UART_Send(&value3, 1);
+			UART_Send(&Length, 1);
+			UART_Send(data, Length);
+		}
 	}
 #endif
 
