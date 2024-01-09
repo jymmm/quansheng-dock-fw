@@ -1,4 +1,8 @@
 # Modified firmware forked from https://github.com/egzumer/uv-k5-firmware-custom
+
+**WARNING** :
+**After some unfortunate incidents by users I'm going to put this warning and disclaimer up. DO NOT attempt to transmit without the proper precautions in place. Transmitting 5W of RF energy centimetres away from a PC can LITERALLY destroy it, it's almost like an EMP at that distance. Get your antenna away from the PC.**
+
 This firmware is required to use my Quansheng Dock project found here : https://github.com/nicsure/QuanshengDock
 
 Download the pre-compiled and packed firmware image here. Use any firmware update tool to burn it to the radio.
