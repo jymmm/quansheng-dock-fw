@@ -9,7 +9,7 @@ Download the pre-compiled and packed firmware image here. Use any firmware updat
 https://github.com/nicsure/quansheng-dock-fw/releases/download/0.27.6q/firmware.packed.bin
 
 Alternativly use your browser to flash the radio.
-https://egzumer.github.io/uvtools/?firmwareURL=https://github.com/nicsure/quansheng-dock-fw/releases/download/v0.21q/firmware.packed.bin
+https://egzumer.github.io/uvtools/?firmwareURL=https://github.com/nicsure/quansheng-dock-fw/releases/download/0.27.6q/firmware.packed.bin
 Thanks go to egzumer for providing this tool.
 
 
