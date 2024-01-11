@@ -481,6 +481,8 @@ static void CMD_052F(const uint8_t *pBuffer)
 		{
 			gSimulateKey = key;
 			gDebounceDefeat = 0;
+			if(key == KEY_PTT)
+				gPttCounter = 40;
 		}
 		gSimulateHold = click ? KEY_INVALID : key;
 	}

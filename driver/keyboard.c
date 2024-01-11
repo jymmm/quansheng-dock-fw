@@ -26,6 +26,7 @@
 	KEY_Code_t gSimulateKey     = KEY_INVALID;
 	KEY_Code_t gSimulateHold     = KEY_INVALID;
 	uint8_t gDebounceDefeat = 0;
+	uint8_t gPttCounter = 0;
 #endif
 
 KEY_Code_t gKeyReading0     = KEY_INVALID;
@@ -111,6 +112,13 @@ KEY_Code_t KEYBOARD_Poll(void)
 		}
 		if(gSimulateHold != KEY_INVALID)
 		{
+			if(gSimulateHold == KEY_PTT)
+			{
+				if(gPttCounter == 0)
+					gSimulateHold = KEY_INVALID;
+				else
+					gPttCounter--;
+			}
 			return gSimulateHold;
 		}
 	#endif
