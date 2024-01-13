@@ -175,6 +175,36 @@ typedef struct {
 			uint8_t Signals[100];
 		} Data;
 	} REPLY_0808_t; // scan reply
+
+	typedef struct {
+		Header_t Header;
+		uint16_t Length;
+		uint16_t RegData[50];
+	} CMD_085X_t; // Set and read registers
+
+	typedef struct {
+		Header_t Header;
+		uint16_t Length;
+		uint8_t GPIOData[50];
+	} CMD_086X_t; // Set and read GPIO bits
+
+	typedef struct {
+		Header_t Header;
+		struct {
+			uint16_t Register;
+			uint16_t Value;
+		} Data;
+	} REPLY_0851_t; // read register
+
+	typedef struct {
+		Header_t Header;
+		struct {
+			uint8_t Gpio;
+			uint8_t Bit;
+		} Data;
+	} REPLY_0861_t; // read GPIO bit
+
+
 #endif
 
 static const uint8_t Obfuscation[16] =
@@ -472,27 +502,6 @@ static void CMD_052F(const uint8_t *pBuffer)
 }
 
 #ifdef ENABLE_DOCK
-	static void CMD_0801(const uint8_t *pBuffer)
-	{
-		const CMD_0801_t *pCmd = (const CMD_0801_t *)pBuffer;
-		const uint8_t key = pCmd->Key & 0x1f;
-		const bool click = pCmd->Key & 32;
-		if(key != KEY_INVALID)
-		{
-			gSimulateKey = key;
-			gDebounceDefeat = 0;
-			if(key == KEY_PTT)
-				gPttCounter = 40;
-		}
-		gSimulateHold = click ? KEY_INVALID : key;
-	}
-
-	static void CMD_0803()
-	{
-		const uint8_t screenDumpIdByte = 0xEF;
-		UART_Send(&screenDumpIdByte, 1);
-		UART_Send(gStatusLine, 1024);
-	}
 
 	static uint16_t	R10,R11,R12,R13,R14,R30,R37,R3D,R43,R47,R48,R7E;
 	static void BackupRegisters() {
@@ -523,6 +532,132 @@ static void CMD_052F(const uint8_t *pBuffer)
 	BK4819_WriteRegister(BK4819_REG_47, R47);
 	BK4819_WriteRegister(BK4819_REG_48, R48);
 	BK4819_WriteRegister(BK4819_REG_7E, R7E);
+	}
+
+	static void CMD_0850(const uint8_t *pBuffer) // write to multiple registers
+	{
+		const CMD_085X_t *pCmd = (const CMD_085X_t *)pBuffer;
+		for(int i=0, j=0; i<pCmd->Length; i++, j+=2)
+		{
+			BK4819_WriteRegister(pCmd->RegData[j], pCmd->RegData[j+1]);
+		}
+	}
+
+	// info on each register is returned as a single packet
+	static void CMD_0851(const uint8_t *pBuffer) // read multiple registers
+	{
+		const CMD_085X_t *pCmd = (const CMD_085X_t *)pBuffer;
+		REPLY_0851_t      Reply;
+		for(int i=0; i<pCmd->Length; i++)
+		{
+			Reply.Header.ID=0x951;
+			Reply.Header.Size = sizeof(Reply.Data);
+			Reply.Data.Register = pCmd->RegData[i];
+			Reply.Data.Value = BK4819_ReadRegister(Reply.Data.Register);
+			SendReply(&Reply, sizeof(Reply));
+		}
+	}
+
+	static void CMD_0860(const uint8_t *pBuffer)
+	{
+		const CMD_086X_t *pCmd = (const CMD_086X_t *)pBuffer;
+		for(int i=0, j=0; i<pCmd->Length; i++, j+=2)
+		{
+			const uint8_t bit = pCmd->GPIOData[j+1];
+			switch(pCmd->GPIOData[j])
+			{
+				case 0:
+					GPIO_SetBit(&GPIOA->DATA, bit);
+					break;
+				case 1:
+					GPIO_SetBit(&GPIOB->DATA, bit);
+					break;
+				case 2:
+					GPIO_SetBit(&GPIOC->DATA, bit);
+					break;
+				case 3:
+					GPIO_ClearBit(&GPIOA->DATA, bit);
+					break;
+				case 4:
+					GPIO_ClearBit(&GPIOB->DATA, bit);
+					break;
+				case 5:
+					GPIO_ClearBit(&GPIOC->DATA, bit);
+					break;
+			}
+		}
+	}
+
+	static void CMD_0861(const uint8_t *pBuffer)
+	{
+		const CMD_086X_t *pCmd = (const CMD_086X_t *)pBuffer;
+		REPLY_0861_t      Reply;
+		for(int i=0, j=0; i<pCmd->Length; i++, j+=2)
+		{
+			Reply.Header.ID = 0x961;
+			Reply.Header.Size = sizeof(Reply.Data);
+			uint8_t bit;
+			switch(pCmd->GPIOData[j])
+			{
+				case 0:
+					bit=GPIO_CheckBit(&GPIOA->DATA, pCmd->GPIOData[j+1]);					
+					break;
+				case 1:
+					bit=GPIO_CheckBit(&GPIOB->DATA, pCmd->GPIOData[j+1]);					
+					break;
+				case 2:
+					bit=GPIO_CheckBit(&GPIOC->DATA, pCmd->GPIOData[j+1]);					
+					break;
+			}
+			Reply.Data.Gpio = pCmd->GPIOData[j] + (bit?0:3);
+			Reply.Data.Bit = pCmd->GPIOData[j+1];
+			SendReply(&Reply, sizeof(Reply));
+		}
+	}
+
+	static void CMD_0870() // enter hardware control mode
+	{
+		FUNCTION_Select(FUNCTION_FOREGROUND);
+		BackupRegisters();
+		while(true) // sit in a loop just executing serial commands
+		{
+			if (UART_IsCommandAvailable())
+			{
+				if(UART_Command.Header.ID == 0x871) // exit h/w control
+					break;
+				if(UART_Command.Header.ID != 0x870) // prevent recursion
+					UART_HandleCommand();
+			}
+			SYSTICK_DelayUs(100); // loop delay
+		}
+		RestoreRegisters();
+		RADIO_SetupRegisters(false);
+		gSimulateKey = 13;
+		gSimulateHold = 19;
+		gDebounceDefeat = 0;				
+		return;		
+	}
+
+	static void CMD_0801(const uint8_t *pBuffer) // smulate a key press
+	{
+		const CMD_0801_t *pCmd = (const CMD_0801_t *)pBuffer;
+		const uint8_t key = pCmd->Key & 0x1f;
+		const bool click = pCmd->Key & 32;
+		if(key != KEY_INVALID)
+		{
+			gSimulateKey = key;
+			gDebounceDefeat = 0;
+			if(key == KEY_PTT)
+				gPttCounter = 40;
+		}
+		gSimulateHold = click ? KEY_INVALID : key;
+	}
+
+	static void CMD_0803() // dumps the LCD screen memory to the PC. Not used in the Dock, is just for debug purposes
+	{
+		const uint8_t screenDumpIdByte = 0xEF;
+		UART_Send(&screenDumpIdByte, 1);
+		UART_Send(gStatusLine, 1024);
 	}
 
 	// scan, this command is blocking, it will continue to run until another serial command is receieved
@@ -835,6 +970,29 @@ void UART_HandleCommand(void)
 		case 0x0808: // scan
 			CMD_0808(UART_Command.Buffer);
 			break;
+
+		case 0x0850:
+			CMD_0850(UART_Command.Buffer);
+			break;
+
+		case 0x0851:
+			CMD_0851(UART_Command.Buffer);
+			break;
+
+		case 0x0860:
+			CMD_0860(UART_Command.Buffer);
+			break;
+
+		case 0x0861:
+			CMD_0861(UART_Command.Buffer);
+			break;
+
+		case 0x0870: // full control mode
+			CMD_0870();
+			break;
+
+
+
 #endif
 
 	}
