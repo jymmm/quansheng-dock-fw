@@ -6,10 +6,10 @@
 This firmware is required to use my Quansheng Dock project found here : https://github.com/nicsure/QuanshengDock
 
 Download the pre-compiled and packed firmware image here. Use any firmware update tool to burn it to the radio.
-https://github.com/nicsure/quansheng-dock-fw/releases/download/0.27.6q/firmware.packed.bin
+https://github.com/nicsure/quansheng-dock-fw/releases/download/0.28.1q/firmware.packed.bin
 
 Alternativly use your browser to flash the radio.
-https://egzumer.github.io/uvtools/?firmwareURL=https://github.com/nicsure/quansheng-dock-fw/releases/download/0.27.6q/firmware.packed.bin
+https://egzumer.github.io/uvtools/?firmwareURL=https://github.com/nicsure/quansheng-dock-fw/releases/download/0.28.1q/firmware.packed.bin
 Thanks go to egzumer for providing this tool.
 
 
