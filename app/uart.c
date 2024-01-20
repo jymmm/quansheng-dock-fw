@@ -203,8 +203,7 @@ typedef struct {
 			uint8_t Bit;
 		} Data;
 	} REPLY_0861_t; // read GPIO bit
-
-
+	
 #endif
 
 static const uint8_t Obfuscation[16] =
@@ -313,6 +312,10 @@ static void CMD_0514(const uint8_t *pBuffer)
 	BACKLIGHT_TurnOff();
 
 	SendVersion();
+
+	#ifdef ENABLE_DOCK
+		gSetting_Remote_UI = (Timestamp == 0x12345678);		
+	#endif	
 }
 
 // read eeprom
@@ -499,6 +502,11 @@ static void CMD_052F(const uint8_t *pBuffer)
 	BACKLIGHT_TurnOff();
 
 	SendVersion();
+
+	#ifdef ENABLE_DOCK
+		gSetting_Remote_UI = (Timestamp == 0x12345678);		
+	#endif
+
 }
 
 #ifdef ENABLE_DOCK
