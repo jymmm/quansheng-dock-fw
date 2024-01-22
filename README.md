@@ -4,9 +4,9 @@ This firmware is required to use my Quansheng Dock project found here
 https://github.com/nicsure/QuanshengDock
 
 Download the pre-compiled and packed firmware image here. Use any firmware update tool to burn it to the radio.  
-https://github.com/nicsure/quansheng-dock-fw/releases/tag/0.31.1q
+https://github.com/nicsure/quansheng-dock-fw/releases/tag/0.31.5w
 
-Alternativly [🗲FLASH WITH A BROWSER🗲](https://egzumer.github.io/uvtools/?firmwareURL=https://github.com/nicsure/quansheng-dock-fw/releases/download/0.31.1q/firmware.packed.bin) (Chromium based browsers only).  
+Alternativly [🗲FLASH WITH A BROWSER🗲](https://egzumer.github.io/uvtools/?firmwareURL=https://github.com/nicsure/quansheng-dock-fw/releases/download/0.31.5w/firmware.packed.bin) (Chromium based browsers only).  
 Thanks go to egzumer for providing this tool.
 
 
