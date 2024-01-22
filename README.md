@@ -1,5 +1,5 @@
 # Modified firmware forked from https://github.com/egzumer/uv-k5-firmware-custom
-# Requires Quansheng Dock V0.31.3q
+# Requires Quansheng Dock V0.31.5w
 This firmware is required to use my Quansheng Dock project found here  
 https://github.com/nicsure/QuanshengDock
 
