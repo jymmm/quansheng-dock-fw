@@ -1,15 +1,12 @@
 # Modified firmware forked from https://github.com/egzumer/uv-k5-firmware-custom
+# Requires Quansheng Dock V0.31.5w
+This firmware is required to use my Quansheng Dock project found here  
+https://github.com/nicsure/QuanshengDock
 
-**WARNING** :
-**After some unfortunate incidents by users I'm going to put this warning and disclaimer up. DO NOT attempt to transmit without the proper precautions in place. Transmitting 5W of RF energy centimetres away from a PC can LITERALLY destroy it, it's almost like an EMP at that distance. Get your antenna away from the PC.**
+Download the pre-compiled and packed firmware image here. Use any firmware update tool to burn it to the radio.  
+https://github.com/nicsure/quansheng-dock-fw/releases/tag/0.31.5w
 
-This firmware is required to use my Quansheng Dock project found here : https://github.com/nicsure/QuanshengDock
-
-Download the pre-compiled and packed firmware image here. Use any firmware update tool to burn it to the radio.
-https://github.com/nicsure/quansheng-dock-fw/releases/download/0.28.1q/firmware.packed.bin
-
-Alternativly use your browser to flash the radio.
-https://egzumer.github.io/uvtools/?firmwareURL=https://github.com/nicsure/quansheng-dock-fw/releases/download/0.28.1q/firmware.packed.bin
+Alternativly [🗲FLASH WITH A BROWSER🗲](https://egzumer.github.io/uvtools/?firmwareURL=https://github.com/nicsure/quansheng-dock-fw/releases/download/0.31.5w/firmware.packed.bin) (Chromium based browsers only).  
 Thanks go to egzumer for providing this tool.
 
 
