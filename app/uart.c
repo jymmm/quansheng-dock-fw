@@ -47,6 +47,7 @@
 	#include "driver/keyboard.h"
 	#include "driver/st7565.h"
 	#include "driver/systick.h"
+	#include "ui/helper.h"
 #endif
 
 #define DMA_INDEX(x, y) (((x) + (y)) % sizeof(UART_DMA_Buffer))
@@ -203,7 +204,29 @@ typedef struct {
 			uint8_t Bit;
 		} Data;
 	} REPLY_0861_t; // read GPIO bit
-	
+
+	typedef struct {
+		Header_t Header;
+		uint16_t Length;
+		uint16_t Mode;
+	} CMD_0872_t; // Set modulation
+
+	typedef struct {
+		Header_t Header;
+		uint32_t StartFreq;
+		uint32_t EndFreq;
+		uint32_t Step;
+	} CMD_0888_t; // Jet scan
+
+	typedef struct {
+		Header_t Header;
+		struct {
+			uint32_t Freqs[16];
+			uint16_t Sigs[16];
+		} Data;
+	} REPLY_0888_t; // Jet scan reply
+
+
 #endif
 
 static const uint8_t Obfuscation[16] =
@@ -240,6 +263,7 @@ static void SendReply(void *pReply, uint16_t Size)
 
 	Header.ID = 0xCDAB;
 	Header.Size = Size;
+
 	UART_Send(&Header, sizeof(Header));
 	UART_Send(pReply, Size);
 
@@ -625,19 +649,55 @@ static void CMD_052F(const uint8_t *pBuffer)
 
 	static void CMD_0870() // enter hardware control mode
 	{
+		UI_DisplayClear();
+		ST7565_BlitFullScreen();
+		gSetting_XVFO = true;
 		FUNCTION_Select(FUNCTION_FOREGROUND);
 		BackupRegisters();
+		bool amModulate = false;
 		while(true) // sit in a loop just executing serial commands
 		{
 			if (UART_IsCommandAvailable())
 			{
 				if(UART_Command.Header.ID == 0x871) // exit h/w control
 					break;
-				if(UART_Command.Header.ID != 0x870) // prevent recursion
-					UART_HandleCommand();
+				switch(UART_Command.Header.ID)
+				{
+					case 0x876: // AM emulation Off
+						amModulate = false;
+						break;
+					case 0x875: // AM emulation ON
+						amModulate = true;
+						break;
+					case 0x874:
+						BACKLIGHT_TurnOff();
+						break;
+					case 0x873:
+						BACKLIGHT_TurnOn();
+						break;
+					case 0x872:{
+						const CMD_0872_t *pCmd = (const CMD_0872_t *)UART_Command.Buffer;
+						RADIO_SetModulation(pCmd->Mode);
+						break;}
+					case 0x870: // prevent recursion
+						break;
+					default:
+						UART_HandleCommand();
+						break;
+				}
 			}
-			SYSTICK_DelayUs(100); // loop delay
+			if(amModulate)
+			{
+				int32_t v = BK4819_ReadRegister(0x64);
+				v -= 0x6a00;
+				if(v < 0) v = 0;
+				v >>= 5;
+				v <<= 8;
+				uint16_t pwr = (BK4819_ReadRegister(0x36) & 0xff)|v;
+				BK4819_WriteRegister(0x36, pwr);
+			}
 		}
+		gSetting_XVFO = false;
 		RestoreRegisters();
 		RADIO_SetupRegisters(false);
 		gSimulateKey = 13;
@@ -668,6 +728,76 @@ static void CMD_052F(const uint8_t *pBuffer)
 		UART_Send(gStatusLine, 1024);
 	}
 
+	static void RestoreRadio()
+	{
+		// restore the radio's configuration
+		RestoreRegisters();
+		RADIO_SetupRegisters(false);
+		gSimulateKey = 13;
+		gSimulateHold = 19;
+		gDebounceDefeat = 0;	
+	}
+
+	static void MaxGain()
+	{
+		// set all the AGC tables to maximum gain
+		BK4819_WriteRegister(BK4819_REG_10, R10 & 0x3ff);
+		BK4819_WriteRegister(BK4819_REG_11, R11 & 0x3ff);
+		BK4819_WriteRegister(BK4819_REG_12, R12 & 0x3ff);
+		BK4819_WriteRegister(BK4819_REG_13, R13 & 0x3ff);
+		BK4819_WriteRegister(BK4819_REG_14, R14 & 0x3ff);	
+	}
+
+	static uint16_t ScanFrequency(const uint32_t freq)
+	{
+		BK4819_SetFrequency((uint32_t)freq); // set to the current step frequency
+		BK4819_PickRXFilterPathBasedOnFrequency((uint32_t)freq); // dunno, everything else does it. Seems pretty self-explanitory though.
+		// seems to be needed to kick the RX in on the new frequency
+		const uint16_t reg = BK4819_ReadRegister(BK4819_REG_30);
+		BK4819_WriteRegister(BK4819_REG_30, reg & 0b111111111111110);
+		BK4819_WriteRegister(BK4819_REG_30, reg);			
+		MaxGain();
+		//SYSTICK_DelayUs(100); // short delay to allow rssi to build up
+		return BK4819_GetRSSI(); // get the signal level
+	}
+
+	// jet scan, one-time fast scan of a range
+	static void CMD_0888(const uint8_t *pBuffer)
+	{
+		const CMD_0888_t *pCmd = (const CMD_0888_t *)pBuffer;
+		const uint32_t step = pCmd->Step;
+		const uint32_t end = pCmd->EndFreq;
+		uint32_t freq = pCmd->StartFreq;
+		REPLY_0888_t *Reply = (REPLY_0888_t *)pBuffer;
+		Reply->Header.ID=0x988;
+		Reply->Header.Size = sizeof(Reply->Data);
+		for(uint8_t i=0; i<16; i++)
+			Reply->Data.Sigs[i] = 0;
+		uint16_t trigger = 0;
+		uint8_t index = 0;
+		MaxGain();
+		for(; freq<=end; freq+=step)
+		{
+			const uint16_t rssi = ScanFrequency(freq);
+			if(rssi>trigger)
+			{
+				Reply->Data.Freqs[index] = freq;
+				Reply->Data.Sigs[index] = rssi;
+				trigger=0xffff;
+				for(uint8_t i=0; i<16; i++)
+				{
+					const uint16_t lv = Reply->Data.Sigs[i];
+					if(lv < trigger)
+					{
+						index = i;
+						trigger = lv;
+					}
+				}
+			}
+		}
+		SendReply(Reply, sizeof(Reply));
+	}
+
 	// scan, this command is blocking, it will continue to run until another serial command is receieved
 	static void CMD_0808(const uint8_t *pBuffer)
 	{
@@ -690,6 +820,7 @@ static void CMD_052F(const uint8_t *pBuffer)
 			uint32_t startFreq = pCmd->MidFreq - ((steps>>1)*step);
 			// may as well re-use the receive buffer
 			REPLY_0808_t* Reply = (REPLY_0808_t*)pBuffer;
+			MaxGain();
 			// loop forever (ish)
 			while(true)
 			{
@@ -700,13 +831,9 @@ static void CMD_052F(const uint8_t *pBuffer)
 						pCmd = (const CMD_0808_t *)UART_Command.Buffer;
 						if(pCmd->Density == 0) // a zero density means to end the scan and change VFO frequency
 						{
-							RestoreRegisters();
 							gCurrentVfo->pRX->Frequency = pCmd->MidFreq;
 							gCurrentVfo->pTX->Frequency = pCmd->MidFreq;
-							RADIO_SetupRegisters(false);
-							gSimulateKey = 13;
-							gSimulateHold = 19;
-							gDebounceDefeat = 0;
+							RestoreRadio();
 							return;
 						}
 						step = pCmd->Width;
@@ -715,14 +842,7 @@ static void CMD_052F(const uint8_t *pBuffer)
 					}
 					else // anything else means to stop scanning
 					{
-						// a hello response is sent to indicate exit from scanning mode
-						SendVersion();
-						// restore the radio's configuration
-						RestoreRegisters();
-						RADIO_SetupRegisters(false);
-						gSimulateKey = 13;
-						gSimulateHold = 19;
-						gDebounceDefeat = 0;				
+						RestoreRadio();
 						return;
 					}
 				}
@@ -731,20 +851,7 @@ static void CMD_052F(const uint8_t *pBuffer)
 				uint32_t freq = startFreq; // starting frequency
 				for(uint32_t tot = 0; tot < steps; freq += step, tot++) // loop through all steps
 				{				
-					BK4819_SetFrequency((uint32_t)freq); // set to the current step frequency
-					BK4819_PickRXFilterPathBasedOnFrequency((uint32_t)freq); // dunno, everything else does it. Seems pretty self-explanitory though.
-					// seems to be needed to kick the RX in on the new frequency
-					uint16_t reg = BK4819_ReadRegister(BK4819_REG_30);
-					BK4819_WriteRegister(BK4819_REG_30, 0);
-					BK4819_WriteRegister(BK4819_REG_30, reg);
-					// set all the AGC tables to maximum gain
-					BK4819_WriteRegister(BK4819_REG_10, R10 & 0x3ff);
-					BK4819_WriteRegister(BK4819_REG_11, R11 & 0x3ff);
-					BK4819_WriteRegister(BK4819_REG_12, R12 & 0x3ff);
-					BK4819_WriteRegister(BK4819_REG_13, R13 & 0x3ff);
-					BK4819_WriteRegister(BK4819_REG_14, R14 & 0x3ff);				
-					SYSTICK_DelayUs(100); // short delay to allow rssi to build up
-					uint16_t sig = BK4819_GetRSSI(); // get the signal level
+					uint16_t sig = ScanFrequency(freq);// BK4819_GetRSSI(); // get the signal level
 					Reply->Data.Signals[icnt++]=(uint8_t)(sig>255?255:sig); // store the signal in the reply buffer, clamp it to 255
 					if(icnt>=100 || tot>=steps-1) // check if we need to send a reply yet
 					{
@@ -997,6 +1104,10 @@ void UART_HandleCommand(void)
 
 		case 0x0870: // full control mode
 			CMD_0870();
+			break;
+
+		case 0x0888: // jet scan
+			CMD_0888(UART_Command.Buffer);
 			break;
 
 

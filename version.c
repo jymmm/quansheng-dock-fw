@@ -1,6 +1,6 @@
 
 #ifdef ENABLE_DOCK
-	#define VER		"QD0.31.1q"
+	#define VER		"0_31_5w"
 #else
 	#ifdef VERSION_STRING
 		#define VER     " "VERSION_STRING

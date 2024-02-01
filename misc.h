@@ -158,6 +158,7 @@ extern enum BacklightOnRxTx_t gSetting_backlight_on_tx_rx;
 
 #ifdef ENABLE_DOCK
 	extern bool		  		 gSetting_Remote_UI;
+	extern bool				 gSetting_XVFO;
 #endif
 
 #ifdef ENABLE_AUDIO_BAR

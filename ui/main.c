@@ -146,6 +146,12 @@ void UI_DisplayAudioBar(void)
 #endif
 		const unsigned int voice_amp  = BK4819_GetVoiceAmplitudeOut();  // 15:0
 
+		// nicsure temp
+		uint8_t* q = (uint8_t*)&voice_amp;
+		UART_SendUiElement(0x55, 0,0,0,4, q);
+		// end temp
+
+
 		// make non-linear to make more sensitive at low values
 		const unsigned int level      = MIN(voice_amp * 8, 65535u);
 		const unsigned int sqrt_level = MIN(sqrt16(level), 124u);
