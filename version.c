@@ -1,6 +1,6 @@
 
 #ifdef ENABLE_DOCK
-	#define VER		"0_31_5w"
+	#define VER		"0_32_8x"
 #else
 	#ifdef VERSION_STRING
 		#define VER     " "VERSION_STRING

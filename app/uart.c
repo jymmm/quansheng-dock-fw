@@ -647,6 +647,28 @@ static void CMD_052F(const uint8_t *pBuffer)
 		}
 	}
 
+	static void RestoreRadio()
+	{
+		// restore the radio's configuration
+		RestoreRegisters();
+		RADIO_SetupRegisters(false);
+		gSimulateKey = 13;
+		gSimulateHold = 19;
+		gDebounceDefeat = 0;	
+	}
+
+	static uint64_t NextFskFifo()
+	{
+		uint64_t x = BK4819_ReadRegister(BK4819_REG_5F);
+		x<<=16;
+		x|=BK4819_ReadRegister(BK4819_REG_5F);
+		x<<=16;
+		x|=BK4819_ReadRegister(BK4819_REG_5F);
+		x<<=16;
+		x|=BK4819_ReadRegister(BK4819_REG_5F);
+		return x;
+	}
+
 	static void CMD_0870() // enter hardware control mode
 	{
 		UI_DisplayClear();
@@ -696,13 +718,19 @@ static void CMD_052F(const uint8_t *pBuffer)
 				uint16_t pwr = (BK4819_ReadRegister(0x36) & 0xff)|v;
 				BK4819_WriteRegister(0x36, pwr);
 			}
+			if(BK4819_ReadRegister(BK4819_REG_0C) & 1u)
+			{
+				BK4819_WriteRegister(BK4819_REG_02, 0);
+				const uint16_t reg02 = BK4819_ReadRegister(0x02);
+				if(reg02 & 0x1000)
+				{
+					uint64_t x = NextFskFifo();
+					UART_SendUiElement(9, 0, 0, 0, 8, &x);				
+				}
+			}
 		}
 		gSetting_XVFO = false;
-		RestoreRegisters();
-		RADIO_SetupRegisters(false);
-		gSimulateKey = 13;
-		gSimulateHold = 19;
-		gDebounceDefeat = 0;				
+		RestoreRadio();				
 		return;		
 	}
 
@@ -726,16 +754,6 @@ static void CMD_052F(const uint8_t *pBuffer)
 		const uint8_t screenDumpIdByte = 0xEF;
 		UART_Send(&screenDumpIdByte, 1);
 		UART_Send(gStatusLine, 1024);
-	}
-
-	static void RestoreRadio()
-	{
-		// restore the radio's configuration
-		RestoreRegisters();
-		RADIO_SetupRegisters(false);
-		gSimulateKey = 13;
-		gSimulateHold = 19;
-		gDebounceDefeat = 0;	
 	}
 
 	static void MaxGain()

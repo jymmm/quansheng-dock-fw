@@ -5,7 +5,7 @@
 
 # ---- STOCK QUANSHENG FERATURES ----
 ENABLE_UART                   ?= 1
-ENABLE_AIRCOPY                ?= 0
+ENABLE_AIRCOPY                ?= 1
 ENABLE_FMRADIO                ?= 1
 ENABLE_NOAA                   ?= 0
 ENABLE_VOICE                  ?= 0
