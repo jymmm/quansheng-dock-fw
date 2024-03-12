@@ -147,8 +147,8 @@ void UI_DisplayAudioBar(void)
 		const unsigned int voice_amp  = BK4819_GetVoiceAmplitudeOut();  // 15:0
 
 		// nicsure temp
-		uint8_t* q = (uint8_t*)&voice_amp;
-		UART_SendUiElement(0x55, 0,0,0,4, q);
+		//uint8_t* q = (uint8_t*)&voice_amp;
+		//UART_SendUiElement(0x55, 0,0,0,4, q);
 		// end temp
 
 

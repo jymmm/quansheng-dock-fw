@@ -49,7 +49,7 @@ typedef enum KEY_Code_e KEY_Code_t;
 	extern KEY_Code_t gSimulateKey;
 	extern KEY_Code_t gSimulateHold;
 	extern uint8_t gDebounceDefeat;
-	extern uint8_t gPttCounter;
+	//extern uint8_t gPttCounter;
 #endif
 extern KEY_Code_t gKeyReading0;
 extern KEY_Code_t gKeyReading1;

@@ -725,7 +725,11 @@ static void CMD_052F(const uint8_t *pBuffer)
 				if(reg02 & 0x1000)
 				{
 					uint64_t x = NextFskFifo();
-					UART_SendUiElement(9, 0, 0, 0, 8, &x);				
+					UART_SendUiElement(9, 0, 0, 0, 8, &x);			
+				}
+				if(reg02 & 0x800)
+				{
+					UART_SendUiElement(10, (BK4819_ReadRegister(BK4819_REG_0B) >> 8) & 0x0F, 0, 0, 0, NULL);					
 				}
 			}
 		}
@@ -734,7 +738,7 @@ static void CMD_052F(const uint8_t *pBuffer)
 		return;		
 	}
 
-	static void CMD_0801(const uint8_t *pBuffer) // smulate a key press
+	static void CMD_0801(const uint8_t *pBuffer) // simulate a key press
 	{
 		const CMD_0801_t *pCmd = (const CMD_0801_t *)pBuffer;
 		const uint8_t key = pCmd->Key & 0x1f;
@@ -743,8 +747,8 @@ static void CMD_052F(const uint8_t *pBuffer)
 		{
 			gSimulateKey = key;
 			gDebounceDefeat = 0;
-			if(key == KEY_PTT)
-				gPttCounter = 40;
+			//if(key == KEY_PTT)
+			//	gPttCounter = 40;
 		}
 		gSimulateHold = click ? KEY_INVALID : key;
 	}

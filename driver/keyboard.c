@@ -112,13 +112,13 @@ KEY_Code_t KEYBOARD_Poll(void)
 		}
 		if(gSimulateHold != KEY_INVALID)
 		{
-			if(gSimulateHold == KEY_PTT)
-			{
-				if(gPttCounter == 0)
-					gSimulateHold = KEY_INVALID;
-				else
-					gPttCounter--;
-			}
+			//if(gSimulateHold == KEY_PTT)
+			//{
+			//	if(gPttCounter == 0)
+			//		gSimulateHold = KEY_INVALID;
+			//	else
+			//		gPttCounter--;
+			//}
 			return gSimulateHold;
 		}
 	#endif
